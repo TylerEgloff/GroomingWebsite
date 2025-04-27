@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Barky Barbers</title>
+</head>
+
+<body>
+
+    <h1>Book Appointment</h1>
+
+    <form id="appointmentForm">
+        <label for="customerName">Customer Name:</label><br>
+        <input type="text" id="customerName" name="customerName" required><br><br>
+
+        <label for="dogBreed">Dog Breed:</label><br>
+        <input type="text" id="dogBreed" name="dogBreed" required><br><br>
+
+        <label for="serviceId">Service ID:</label><br>
+        <input type="number" id="serviceId" name="serviceId" required><br><br>
+
+        <label for="appointmentDate">Asppointment Date:</label><br>
+        <input type="date" id="appointmentDate" name="appointmentDate" required><br><br>
+
+        <label for="appointmentTime">Appointment Time:</label><br>
+        <input type="time" id="appointmentTime" name="appointmentTime" required><br><br>
+
+        <button type="submit">Book Appointment</button>
+    </form>
+
+    <p id="response"></p>
+
+    <script>
+        document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const appointment = {
+                customerName: document.getElementById('customerName').value,
+                dogBreed: document.getElementById('dogBreed').value,
+                serviceId: parseInt(document.getElementById('serviceId').value),
+                appointmentDate: document.getElementById('appointmentDate').value,
+                appointmentTime: document.getElementById('appointmentTime').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(appointment)
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>
