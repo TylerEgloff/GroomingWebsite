@@ -21,7 +21,7 @@ import jakarta.persistence.Table;
 public class Appointment {
 
     @Id // identifies ID as primary key
-    @GeneratedValue(strategy = GenerationType.AUTO) // Tells JPA to follow database ID generation (currently auto-incrementing)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tells JPA to follow database ID generation (currently auto-incrementing)
 
     private Long id;
     private String customerName;

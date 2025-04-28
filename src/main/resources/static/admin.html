@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+</head>
+
+<body>
+    <h2>Appointments</h2>
+    <button id="addAppointmentBtn">Add Appointment</button>
+    <ul id="appointmentList"></ul>
+
+    <hr>
+
+    <h2>Services</h2>
+    <button id="addServiceBtn">Add Service</button>
+    <ul id="serviceList"></ul>
+
+    <script>
+        const addAppointmentBtn = document.getElementById('addAppointmentBtn');
+        addAppointmentBtn.addEventListener('click', async function () {
+            await addAppointment(); // no parameters needed now
+        });
+
+        // Function to fetch and display appointments
+        async function fetchAppointments() {
+            try {
+                const response = await fetch('http://localhost:8080/appointments');
+                const appointments = await response.json();
+                const appointmentList = document.getElementById('appointmentList');
+                appointmentList.innerHTML = '';
+
+                appointments.forEach(appointment => {
+                    const li = document.createElement('li');
+                    li.textContent = `ID: ${appointment.id}, Customer: ${appointment.customerName}, Dog Breed: ${appointment.dogBreed}, Service ID: ${appointment.serviceId}, Date: ${appointment.appointmentDate}, Time: ${appointment.appointmentTime}`;
+
+                    // Create Delete button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = function () {
+                        deleteAppointment(appointment.id);
+                    };
+
+                    // Create Edit button
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = function () {
+                        editAppointment(appointment);
+                    };
+
+                    li.appendChild(deleteBtn);
+                    li.appendChild(editBtn);
+                    appointmentList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error fetching appointments:', error);
+            }
+        }
+
+        // Function to delete an appointment given its ID
+        async function deleteAppointment(appointmentId) {
+            try {
+                const response = await fetch(`http://localhost:8080/appointments/${appointmentId}`, {
+                    method: 'DELETE'
+                });
+                // Refresh the list after deletion
+                fetchAppointments();
+            } catch (error) {
+                console.error('Error deleting appointment:', error);
+            }
+        }
+
+        // Function to edit an appointment
+        async function editAppointment(appointment) {
+            const newCustomerName = prompt("Enter new customer name:", appointment.customerName);
+            const newDogBreed = prompt("Enter new dog breed:", appointment.dogBreed);
+            const newServiceId = parseInt(prompt("Enter new service ID:", appointment.serviceId));
+            const newDate = prompt("Enter new appointment date:", appointment.appointmentDate);
+            const newTime = prompt("Enter new appointment time:", appointment.appointmentTime);
+
+            const updatedAppointment = {
+                customerName: newCustomerName,
+                dogBreed: newDogBreed,
+                serviceId: newServiceId,
+                appointmentDate: newDate,
+                appointmentTime: newTime
+            };
+
+            try {
+                const response = await fetch(`http://localhost:8080/appointments/${appointment.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedAppointment)
+                });
+                fetchAppointments(); // Refresh list after editing
+            } catch (error) {
+                console.error('Error editing appointment:', error);
+            }
+        }
+
+        // Function to add a new appointment
+        async function addAppointment() {
+            const customerName = prompt("Enter customer name:");
+            const dogBreed = prompt("Enter dog breed:");
+            const serviceId = parseInt(prompt("Enter service ID:"));
+            const appointmentDate = prompt("Enter appointment date (YYYY-MM-DD):");
+            const appointmentTime = prompt("Enter appointment time (HH:MM):");
+
+            const appointment = {
+                customerName: customerName,
+                dogBreed: dogBreed,
+                serviceId: serviceId,
+                appointmentDate: appointmentDate,
+                appointmentTime: appointmentTime
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(appointment)
+                });
+                fetchAppointments(); // Refresh list after adding
+            } catch (error) {
+                console.error('Error adding appointment:', error);
+            }
+        }
+
+        const addServiceBtn = document.getElementById('addServiceBtn');
+        addServiceBtn.addEventListener('click', async function () {
+            await addService(); // no parameters needed now
+        });
+
+        // Function to fetch and display services
+        async function fetchServices() {
+            try {
+                const response = await fetch('http://localhost:8080/services');
+                const services = await response.json();
+                const serviceList = document.getElementById('serviceList');
+                serviceList.innerHTML = '';
+
+                services.forEach(service => {
+                    const li = document.createElement('li');
+                    li.textContent = `ID: ${service.id}, Name: ${service.name}, Price: $${service.price} `;
+
+                    // Create Delete button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = function () {
+                        deleteService(service.id);
+                    };
+
+                    // Create Edit button
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = function () {
+                        editService(service);
+                    };
+
+                    li.appendChild(deleteBtn);
+                    li.appendChild(editBtn);
+                    serviceList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error fetching services:', error);
+            }
+        }
+
+        // Delete a service given its ID
+        async function deleteService(serviceId) {
+            try {
+                const response = await fetch(`http://localhost:8080/services/${serviceId}`, {
+                    method: 'DELETE'
+                });
+                // Refresh the list after deletion
+                fetchServices();
+            } catch (error) {
+                console.error('Error deleting service:', error);
+            }
+        }
+
+        // Add a new service
+        async function addService() {
+            const name = prompt("Enter service name:");
+            const description = prompt("Enter service description:");
+            const price = parseFloat(prompt("Enter service price:"));
+
+            const service = {
+                name: name,
+                description: description,
+                price: price
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/services', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(service)
+                });
+                fetchServices(); // Refresh list after adding
+            } catch (error) {
+                console.error('Error adding service:', error);
+            }
+        }
+
+        // Edit a service
+        async function editService(service) {
+            const newName = prompt("Enter new service name:", service.name);
+            const newDescription = prompt("Enter new description:", service.description);
+            const newPrice = parseFloat(prompt("Enter new price:", service.price));
+
+            const updatedService = {
+                name: newName,
+                description: newDescription,
+                price: newPrice
+            };
+
+            try {
+                const response = await fetch(`http://localhost:8080/services/${service.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedService)
+                });
+                fetchServices(); // Refresh list after editing
+            } catch (error) {
+                console.error('Error editing service:', error);
+            }
+        }
+
+        // Initial fetch
+        fetchAppointments();
+        fetchServices();
+    </script>
+</body>
+
+</html>
