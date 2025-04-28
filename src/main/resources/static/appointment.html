@@ -20,7 +20,7 @@
         <label for="serviceId">Service ID:</label><br>
         <input type="number" id="serviceId" name="serviceId" required><br><br>
 
-        <label for="appointmentDate">Asppointment Date:</label><br>
+        <label for="appointmentDate">Appointment Date:</label><br>
         <input type="date" id="appointmentDate" name="appointmentDate" required><br><br>
 
         <label for="appointmentTime">Appointment Time:</label><br>
@@ -31,10 +31,19 @@
 
     <p id="response"></p>
 
+    <hr>
+
+    <div class="services">
+        <h1>Services</h2>
+        <ul id="serviceList"></ul>
+    </div>
+
     <script>
+        // Handle form on submit
         document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            // Getting each data value
             const appointment = {
                 customerName: document.getElementById('customerName').value,
                 dogBreed: document.getElementById('dogBreed').value,
@@ -44,6 +53,7 @@
             };
 
             try {
+                // POST request new appointment into 'appointments' table
                 const response = await fetch('http://localhost:8080/appointments', {
                     method: 'POST',
                     headers: {
@@ -55,7 +65,34 @@
                 console.error('Error:', error);
             }
         });
+
+        // Get request to 'services' table, appending each service to HTML
+        async function loadServices() {
+            const serviceList = document.getElementById('serviceList');
+            try {
+                const response = await fetch('http://localhost:8080/services', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const services = await response.json();
+                serviceList.innerHTML = ''; // Ensure empty list before appending anything
+                // Append each service
+                services.forEach(service => {
+                    const li = document.createElement('li');
+                    li.textContent = `${service.id} - ${service.name} ($${service.price})`;
+                    serviceList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Call on page load
+        loadServices();
     </script>
+
 
 </body>
 

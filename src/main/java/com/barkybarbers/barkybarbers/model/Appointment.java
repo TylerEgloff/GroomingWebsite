@@ -1,3 +1,10 @@
+/**
+ * Represents an appointment in the appointment registry.
+ * 
+ * Appointment is a JPA entity that is mapped to the 'appointments' table in the SQL database. 
+ * Stores customer info, dog breed, requested service ID (foreign key to 'services' table), appointment date, and time.
+ */
+
 package com.barkybarbers.barkybarbers.model;
 
 import java.time.LocalDate;
@@ -13,10 +20,10 @@ import jakarta.persistence.Table;
 @Table(name = "appointments")
 public class Appointment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id // identifies ID as primary key
+    @GeneratedValue(strategy = GenerationType.AUTO) // Tells JPA to follow database ID generation (currently auto-incrementing)
 
+    private Long id;
     private String customerName;
     private String dogBreed;
     private Long serviceId;

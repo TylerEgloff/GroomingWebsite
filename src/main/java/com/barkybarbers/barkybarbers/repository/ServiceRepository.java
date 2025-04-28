@@ -8,7 +8,7 @@ package com.barkybarbers.barkybarbers.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.barkybarbers.barkybarbers.model.Appointment;
+import com.barkybarbers.barkybarbers.model.Service;
 
-public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+public interface ServiceRepository extends JpaRepository<Service, Long> {
 }

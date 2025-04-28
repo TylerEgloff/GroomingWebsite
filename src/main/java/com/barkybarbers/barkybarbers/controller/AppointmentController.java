@@ -1,10 +1,21 @@
+/**
+ * REST controller for appointment requests.
+ * 
+ * Connects JavaScript form submission with JPA 'Appointment' Entity.
+ */
+
 package com.barkybarbers.barkybarbers.controller;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.barkybarbers.barkybarbers.model.Appointment;
 import com.barkybarbers.barkybarbers.repository.AppointmentRepository;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/appointments")
