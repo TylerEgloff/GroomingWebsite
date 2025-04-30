@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 public class Service {
 
     @Id // identifies ID as primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tells JPA to follow database ID generation (currently auto-incrementing)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tells JPA to increment ID
 
     private Integer id;
     private String name;

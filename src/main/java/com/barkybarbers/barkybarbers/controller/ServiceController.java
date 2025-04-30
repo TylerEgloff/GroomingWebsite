@@ -1,7 +1,7 @@
 /**
  * REST controller for service requests
  *
- * Connects JavaScript form submission with JPA 'Service' Entity.
+ * Receives service form data, builds Service object, and provides endpoints for CRUD operations.
  */
 package com.barkybarbers.barkybarbers.controller;
 

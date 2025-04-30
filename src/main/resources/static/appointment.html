@@ -7,26 +7,29 @@
 </head>
 
 <body>
-
     <h1>Book Appointment</h1>
+    <button id="showAppointmentModalBtn">Book Appointment</button>
 
-    <form id="appointmentForm">
-        <label for="customerName">Customer Name:</label><br>
-        <input type="text" id="customerName" name="customerName" required><br><br>
+    <form class="modalForm" id="appointmentModal" style="display:none;">
+        <h3>Book Appointment</h3>
+        <label for="modalCustomerName">Customer Name:</label>
+        <input type="text" id="modalCustomerName" required><br><br>
 
-        <label for="dogBreed">Dog Breed:</label><br>
-        <input type="text" id="dogBreed" name="dogBreed" required><br><br>
+        <label for="modalDogBreed">Dog Breed:</label>
+        <input type="text" id="modalDogBreed" required><br><br>
 
-        <label for="serviceId">Service ID:</label><br>
-        <input type="number" id="serviceId" name="serviceId" required><br><br>
+        <label for="modalAppointmentDate">Date:</label>
+        <input type="date" id="modalAppointmentDate" required><br><br>
 
-        <label for="appointmentDate">Appointment Date:</label><br>
-        <input type="date" id="appointmentDate" name="appointmentDate" required><br><br>
+        <label for="modalAppointmentTime">Time:</label>
+        <input type="time" id="modalAppointmentTime" required><br><br>
 
-        <label for="appointmentTime">Appointment Time:</label><br>
-        <input type="time" id="appointmentTime" name="appointmentTime" required><br><br>
+        <label for="modalServices">Services:</label>
+        <ul id="modalServicesList" style="list-style-type:none; padding-left:0;"></ul>
+        <br>
 
-        <button type="submit">Book Appointment</button>
+        <button type="submit" id="modalSubmitBtn">Submit</button>
+        <button type="button" id="modalCloseBtn">Cancel</button>
     </form>
 
     <p id="response"></p>
@@ -34,34 +37,90 @@
     <hr>
 
     <div class="services">
-        <h1>Services</h2>
+        <h1>Services</h1>
         <ul id="serviceList"></ul>
     </div>
 
     <script>
-        // Handle form on submission
-        document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
+        const showAppointmentModalBtn = document.getElementById('showAppointmentModalBtn');
+        const appointmentModal = document.getElementById('appointmentModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const modalServicesList = document.getElementById('modalServicesList');
+        const responseP = document.getElementById('response');
+
+        // Show modal on button click
+        showAppointmentModalBtn.addEventListener('click', function () {
+            appointmentModal.style.display = 'block';
+            populateModalServices();
+        });
+
+        // Hide modal on Cancel
+        modalCloseBtn.addEventListener('click', function () {
+            appointmentModal.style.display = 'none';
+        });
+
+        // Populate services as checkboxes
+        async function populateModalServices() {
+            modalServicesList.innerHTML = '';
+            try {
+                const response = await fetch('http://localhost:8080/services');
+                const services = await response.json();
+                services.forEach(service => {
+                    const li = document.createElement('li');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = service.id;
+                    checkbox.id = `service_${service.id}`;
+                    li.appendChild(checkbox);
+
+                    const label = document.createElement('label');
+                    label.htmlFor = checkbox.id;
+                    label.textContent = `${service.name} ($${service.price})`;
+                    li.appendChild(label);
+
+                    modalServicesList.appendChild(li);
+                });
+            } catch (error) {
+                modalServicesList.innerHTML = '<li>Error loading services</li>';
+            }
+        }
+
+        // Handle form submission
+        appointmentModal.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // Getting each data value
+            const customerName = document.getElementById('modalCustomerName').value;
+            const dogBreed = document.getElementById('modalDogBreed').value;
+            const appointmentDate = document.getElementById('modalAppointmentDate').value;
+            const appointmentTime = document.getElementById('modalAppointmentTime').value;
+
+            // Get selected service IDs
+            const selectedServiceIds = Array.from(modalServicesList.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => parseInt(cb.value));
+
             const appointment = {
-                customerName: document.getElementById('customerName').value,
-                dogBreed: document.getElementById('dogBreed').value,
-                serviceId: parseInt(document.getElementById('serviceId').value),
-                appointmentDate: document.getElementById('appointmentDate').value,
-                appointmentTime: document.getElementById('appointmentTime').value
+                customerName,
+                dogBreed,
+                appointmentDate,
+                appointmentTime,
+                serviceIds: selectedServiceIds
             };
 
             try {
                 // POST request new appointment into 'appointments' table
                 const response = await fetch('http://localhost:8080/appointments', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(appointment)
                 });
+                if (response.ok) {
+                    responseP.textContent = "Appointment booked successfully!";
+                } else {
+                    responseP.textContent = "Failed to book appointment.";
+                }
+                appointmentModal.style.display = 'none';
             } catch (error) {
+                responseP.textContent = "Error booking appointment.";
                 console.error('Error:', error);
             }
         });
@@ -70,30 +129,22 @@
         async function loadServices() {
             const serviceList = document.getElementById('serviceList');
             try {
-                const response = await fetch('http://localhost:8080/services', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                const response = await fetch('http://localhost:8080/services');
                 const services = await response.json();
                 serviceList.innerHTML = ''; // Ensure empty list before appending anything
                 // Append each service
                 services.forEach(service => {
                     const li = document.createElement('li');
-                    li.textContent = `${service.id} - ${service.name} ($${service.price})`;
+                    li.textContent = `${service.name} ($${service.price})`;
                     serviceList.appendChild(li);
                 });
             } catch (error) {
-                console.error('Error:', error);
+                serviceList.innerHTML = '<li>Error loading services</li>';
             }
         }
 
-        // Call on page load
+        // Initial load
         loadServices();
     </script>
-
-
 </body>
-
 </html>
