@@ -1,5 +1,5 @@
 /**
- * Handles requests for the root URL. Redirects to the appointment page.
+ * Handles requests to the root URL. Redirects to the home page.
  */
 
 package com.barkybarbers.barkybarbers.controller;
@@ -12,6 +12,6 @@ public class IndexController {
 
     @GetMapping("/")
     public String home() {
-        return "appointment.html";
+        return "index.html";
     }
 }

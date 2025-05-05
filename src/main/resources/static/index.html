@@ -1,0 +1,241 @@
+<!--
+TODO:
+ - 
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barky Barbers - Dog Grooming Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .hero-section {
+            padding: 60px 0;
+            background-color: #e9ecef;
+        }
+        .hero-section .col-lg-6:last-child {
+            margin-top: 30px;
+        }
+        @media (min-width: 992px) {
+            .hero-section .col-lg-6:last-child {
+                margin-top: 0;
+            }
+        }
+        .about-section {
+            padding: 60px 0;
+        }
+        .about-section .col-lg-6:last-child {
+            margin-top: 30px;
+        }
+        @media (min-width: 992px) {
+            .about-section .col-lg-6:last-child {
+                margin-top: 0;
+            }
+        }
+        .about-image {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 100%;
+            height: auto;
+        }
+        .service-card {
+            height: 100%;
+        }
+        #alertPlaceholder {
+            margin-bottom: 20px;
+        }
+        .services-section {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Barky Barbers</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appointment.html">My Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dogs.html">My Dogs</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item" id="loginNav">
+                        <a class="nav-link" href="/login.html">Login/Register</a>
+                    </li>
+                    <li class="nav-item" id="logoutNav" style="display: none;">
+                        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin.html">*Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="alertPlaceholder" class="container mt-3"></div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 mb-4">Welcome to Barky Barbers</h1>
+                    <p class="lead mb-4">Professional dog grooming services to keep your furry friends looking and feeling their best.</p>
+                    <a href="/login.html" class="btn btn-primary btn-lg">Book an Appointment</a>
+                </div>
+                <div class="col-lg-6">
+                    <img src="img/hero-image.jpg" 
+                         alt="Happy dog after grooming" class="img-fluid rounded"> <!-- https://www.pexels.com/photo/a-dog-showing-tongue-while-grooming-6816860/ -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section py-5 bg-light">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2 class="mb-3">Our Services</h2>
+                    <p class="lead">We offer a variety of grooming services to keep your dog looking and feeling great</p>
+                </div>
+            </div>
+            
+            <div class="row" id="serviceList">
+                <!-- Services -->
+                <div class="col-12 text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Show logout button if user is logged in
+            if (currentUser) {
+                document.getElementById('loginNav').style.display = 'none';
+                document.getElementById('logoutNav').style.display = 'block';
+            }
+            
+            // Initialize
+            loadServices();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('currentUser');
+                    showAlert('Logged out successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                });
+            }
+        }
+
+        // Show alert messages
+        function showAlert(message, type) {
+            const alertPlaceholder = document.getElementById('alertPlaceholder');
+            const wrapper = document.createElement('div');
+            
+            wrapper.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            alertPlaceholder.innerHTML = '';
+            alertPlaceholder.appendChild(wrapper);
+            
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getOrCreateInstance(wrapper.querySelector('.alert'));
+                alert.close();
+            }, 5000); // 5s timeout
+        }
+
+        // Display services
+        async function loadServices() {
+            const serviceList = document.getElementById('serviceList');
+            
+            try {
+                const response = await fetch('/api/services');
+                if (response.ok) {
+                    const services = await response.json();
+                    serviceList.innerHTML = '';
+                    
+                    if (services.length === 0) {
+                        serviceList.innerHTML = '<div class="col-12 text-center"><p>No services available at the moment.</p></div>';
+                        return;
+                    }
+                    
+                    // Create service cards
+                    services.forEach(service => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-4 mb-4';
+                        
+                        col.innerHTML = `
+                            <div class="card service-card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">${service.name}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">$${service.price}</h6>
+                                    <p class="card-text">${service.description || 'No description available'}</p>
+                                </div>
+                                <div class="card-footer bg-transparent text-center">
+                                    <a href="/login.html" class="btn btn-sm btn-outline-primary book-service-btn">
+                                        Book This Service
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        
+                        serviceList.appendChild(col);
+                    });
+                    
+                    // Update buttons if user is logged in
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                    if (currentUser) {
+                        document.querySelectorAll('.book-service-btn').forEach(button => {
+                            button.href = '/appointment.html';
+                            button.textContent = 'Book This Service';
+                        });
+                    }
+                } else {
+                    serviceList.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Failed to load services</p></div>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                serviceList.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error loading services</p></div>';
+            }
+        }
+    </script>
+</body>
+</html>

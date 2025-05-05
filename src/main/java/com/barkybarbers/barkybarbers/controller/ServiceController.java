@@ -1,8 +1,6 @@
 /**
  * REST controller for service requests
- *
- * Receives service form data, builds Service object, and provides endpoints for CRUD operations.
- */
+ * */
 package com.barkybarbers.barkybarbers.controller;
 
 import java.util.List;
@@ -20,31 +18,35 @@ import com.barkybarbers.barkybarbers.model.Service;
 import com.barkybarbers.barkybarbers.repository.ServiceRepository;
 
 @RestController
-@RequestMapping("/services")
+@RequestMapping("/api/services")
 public class ServiceController {
 
     private final ServiceRepository serviceRepository;
 
-    public ServiceController(ServiceRepository serviceRepository) {
+    public ServiceController(ServiceRepository serviceRepository) { // Constructor
         this.serviceRepository = serviceRepository;
     }
 
+    // Get all services
     @GetMapping
     public List<Service> getAllServices() {
         return serviceRepository.findAll();
     }
 
+    // Create a new service
     @PostMapping
     public Service createService(@RequestBody Service service) {
         return serviceRepository.save(service);
     }
 
-    @DeleteMapping("/{id}")
+    // Delete a service given its ID
+    @DeleteMapping("/api/services/{id}")
     public void deleteService(@PathVariable Long id) {
         serviceRepository.deleteById(id);
     }
 
-    @PutMapping("/{id}")
+    // Update a service given its ID
+    @PutMapping("/api/services/{id}")
     public Service updateService(@PathVariable Long id, @RequestBody Service updatedService) {
         Service service = serviceRepository.findById(id).orElseThrow(() -> new RuntimeException("Service not found"));
 

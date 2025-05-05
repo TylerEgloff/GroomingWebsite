@@ -1,150 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Barky Barbers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barky Barbers - My Appointments</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        #appointmentModal {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            display: none;
+        }
+        #response {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .appointment-status {
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+        .status-scheduled {
+            background-color: #cff4fc;
+            color: #055160;
+        }
+        .status-completed {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        #showAppointmentModalBtn {
+            margin-bottom: 20px;
+        }
+        .appointment-card {
+            margin-bottom: 20px;
+        }
+        .services-section {
+            margin-top: 40px;
+            padding-top: 20px;
+        }
+        hr {
+            margin: 40px 0;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Book Appointment</h1>
-    <button id="showAppointmentModalBtn">Book Appointment</button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Barky Barbers</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/appointment.html">My Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dogs.html">My Dogs</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item" id="loginNav">
+                        <a class="nav-link" href="/login.html">Login/Register</a>
+                    </li>
+                    <li class="nav-item" id="logoutNav" style="display: none;">
+                        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin.html">*Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <form class="modalForm" id="appointmentModal" style="display:none;">
-        <h3>Book Appointment</h3>
-        <label for="modalCustomerName">Customer Name:</label>
-        <input type="text" id="modalCustomerName" required><br><br>
+    <div class="container">
+        <div class="row mb-8">
+            <div class="col-12 mt-4">
+                <h1 class="text-center">My Appointments</h1>
+                <p class="text-center">Book and manage your dog grooming appointments</p>
+                <div id="alertPlaceholder"></div>
+            </div>
+        </div>
 
-        <label for="modalDogBreed">Dog Breed:</label>
-        <input type="text" id="modalDogBreed" required><br><br>
+        <div class="row">
+            <div class="col-12 text-center">
+                <button id="showAppointmentModalBtn" class="btn btn-primary btn-lg">Book New Appointment</button>
+            </div>
+        </div>
 
-        <label for="modalAppointmentDate">Date:</label>
-        <input type="date" id="modalAppointmentDate" required><br><br>
+        <hr class="my-3">
 
-        <label for="modalAppointmentTime">Time:</label>
-        <input type="time" id="modalAppointmentTime" required><br><br>
+        <!-- My Appointments Section -->
+        <div class="row mb-4 justify-content-center">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Upcoming Appointments</h2>
+                <div id="myAppointments">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <label for="modalServices">Services:</label>
-        <ul id="modalServicesList" style="list-style-type:none; padding-left:0;"></ul>
-        <br>
+        <div id="appointmentModal">
+            <h3 class="mb-4">Book Appointment</h3>
+            <form id="appointmentForm">
+                <div class="mb-3">
+                    <label for="dogSelect" class="form-label">Select Your Dog:</label>
+                    <select class="form-select" id="dogSelect" required>
+                        <option value="">Choose a dog...</option>
+                    </select>
+                    <div class="form-text">Don't see your dog? <a href="/dogs.html?openAddDogModal=true">Add a new dog</a> first.</div>
+                </div>
 
-        <button type="submit" id="modalSubmitBtn">Submit</button>
-        <button type="button" id="modalCloseBtn">Cancel</button>
-    </form>
+                <div class="mb-3">
+                    <label for="modalAppointmentDate" class="form-label">Date:</label>
+                    <input type="date" class="form-control" id="modalAppointmentDate" required>
+                </div>
 
-    <p id="response"></p>
+                <div class="mb-3">
+                    <label for="modalAppointmentTime" class="form-label">Time:</label>
+                    <input type="time" class="form-control" id="modalAppointmentTime" required>
+                </div>
 
-    <hr>
+                <div class="mb-3">
+                    <label class="form-label">Services:</label>
+                    <div id="modalServicesList" class="list-group">
+                        <!-- Services will be populated here -->
+                    </div>
+                </div>
 
-    <div class="services">
-        <h1>Services</h1>
-        <ul id="serviceList"></ul>
+                <div class="mb-3">
+                    <label for="modalNotes" class="form-label">Special Instructions:</label>
+                    <textarea class="form-control" id="modalNotes" rows="3" placeholder="Any special requests or notes for the groomer?"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" id="modalCloseBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="modalSubmitBtn" class="btn btn-primary">Book Now</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="response" style="display: none;"></div>
+
+        <hr class="my-3">
+
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Our Services</h2>
+            </div>
+        </div>
+
+        <div class="row justify-content-center" id="serviceList">
+            <!-- Services will be populated here -->
+            <div class="col-12 text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const showAppointmentModalBtn = document.getElementById('showAppointmentModalBtn');
-        const appointmentModal = document.getElementById('appointmentModal');
-        const modalCloseBtn = document.getElementById('modalCloseBtn');
-        const modalServicesList = document.getElementById('modalServicesList');
-        const responseP = document.getElementById('response');
-
-        // Show modal on button click
-        showAppointmentModalBtn.addEventListener('click', function () {
-            appointmentModal.style.display = 'block';
-            populateModalServices();
+        // Check if user is logged in
+        let currentUser;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Show logout button if user is logged in
+            if (currentUser) {
+                document.getElementById('loginNav').style.display = 'none';
+                document.getElementById('logoutNav').style.display = 'block';
+                
+                // Load user's appointments
+                loadUserAppointments();
+            } else {
+                // Show login message and redirect
+                showAlert('Please login to view your appointments', 'warning');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
+                
+                // Hide book appointment button for non-logged in users
+                document.getElementById('showAppointmentModalBtn').style.display = 'none';
+            }
+            
+            // Initialize
+            loadServices();
+            setupEventListeners();
+            
+            // Check if we have a dog ID in the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const dogId = urlParams.get('dogId');
+            
+            if (dogId && currentUser) {
+                // Automatically open the appointment modal with the selected dog
+                setTimeout(() => {
+                    document.getElementById('showAppointmentModalBtn').click();
+                    
+                    setTimeout(() => {
+                        const dogSelect = document.getElementById('dogSelect');
+                        if (dogSelect) {
+                            dogSelect.value = dogId;
+                        }
+                    }, 500); // Allow time for modal load
+                }, 100);
+            }
         });
 
-        // Hide modal on Cancel
-        modalCloseBtn.addEventListener('click', function () {
-            appointmentModal.style.display = 'none';
-        });
+        function setupEventListeners() {
+            const showAppointmentModalBtn = document.getElementById('showAppointmentModalBtn');
+            const appointmentModal = document.getElementById('appointmentModal');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            const appointmentForm = document.getElementById('appointmentForm');
+            
+            // Show modal on button click
+            showAppointmentModalBtn.addEventListener('click', function() {
+                if (!currentUser) {
+                    showAlert('Please login to book an appointment', 'warning');
+                    return;
+                }
+                
+                loadUserDogs();
+                populateModalServices();
+                
+                appointmentModal.style.display = 'block';
+            });
+            
+            // Hide modal on cancel
+            modalCloseBtn.addEventListener('click', function() {
+                appointmentModal.style.display = 'none';
+            });
+            
+            appointmentForm.addEventListener('submit', handleAppointmentSubmission);
+            
+            // Logout 
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('currentUser');
+                showAlert('Logged out successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+            });
+        }
 
-        // Populate services as checkboxes
-        async function populateModalServices() {
-            modalServicesList.innerHTML = '';
+        // Load user's dogs
+        async function loadUserDogs() {
+            if (!currentUser || !currentUser.id) return;
+            
+            const dogSelect = document.getElementById('dogSelect');
+            dogSelect.innerHTML = '<option value="">Choose a dog...</option>';
+            
             try {
-                const response = await fetch('http://localhost:8080/services');
-                const services = await response.json();
-                services.forEach(service => {
-                    const li = document.createElement('li');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.value = service.id;
-                    checkbox.id = `service_${service.id}`;
-                    li.appendChild(checkbox);
-
-                    const label = document.createElement('label');
-                    label.htmlFor = checkbox.id;
-                    label.textContent = `${service.name} ($${service.price})`;
-                    li.appendChild(label);
-
-                    modalServicesList.appendChild(li);
-                });
+                const response = await fetch(`/api/dogs/user/${currentUser.id}`);
+                if (response.ok) {
+                    const dogs = await response.json();
+                    
+                    if (dogs.length === 0) {
+                        showAlert('You need to add a dog before booking an appointment', 'warning');
+                        return;
+                    }
+                    
+                    dogs.forEach(dog => {
+                        const option = document.createElement('option');
+                        option.value = dog.id;
+                        option.textContent = `${dog.name} (${dog.breed || 'Unknown breed'})`;
+                        dogSelect.appendChild(option);
+                    });
+                    
+                    // Check if we have a selected dog from localStorage
+                    const selectedDogId = localStorage.getItem('selectedDogId');
+                    if (selectedDogId) {
+                        dogSelect.value = selectedDogId;
+                        localStorage.removeItem('selectedDogId');
+                        localStorage.removeItem('selectedDogName');
+                    }
+                } else {
+                    showAlert('Failed to load your dogs', 'danger');
+                }
             } catch (error) {
-                modalServicesList.innerHTML = '<li>Error loading services</li>';
+                console.error('Error loading dogs:', error);
+                showAlert('Error loading your dogs', 'danger');
             }
         }
 
-        // Handle form submission
-        appointmentModal.addEventListener('submit', async function (e) {
-            e.preventDefault();
+        // Populate services as checkboxes
+        async function populateModalServices() {
+            const modalServicesList = document.getElementById('modalServicesList');
+            modalServicesList.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div>';
+            
+            try {
+                const response = await fetch('/api/services');
+                if (response.ok) {
+                    const services = await response.json();
+                    
+                    modalServicesList.innerHTML = '';
+                    
+                    if (services.length === 0) {
+                        modalServicesList.innerHTML = '<div class="list-group-item">No services available</div>';
+                        return;
+                    }
+                    
+                    services.forEach(service => {
+                        const item = document.createElement('div');
+                        item.className = 'list-group-item';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.className = 'form-check-input me-2';
+                        checkbox.value = service.id;
+                        checkbox.id = `service_${service.id}`;
+                        
+                        const label = document.createElement('label');
+                        label.className = 'form-check-label';
+                        label.htmlFor = checkbox.id;
+                        label.innerHTML = `<strong>${service.name}</strong> - $${service.price}<br>
+                                          <small class="text-muted">${service.description || 'No description available'}</small>`;
+                        
+                        item.appendChild(checkbox);
+                        item.appendChild(label);
+                        modalServicesList.appendChild(item);
+                    });
+                } else {
+                    modalServicesList.innerHTML = '<div class="list-group-item text-danger">Error loading services</div>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                modalServicesList.innerHTML = '<div class="list-group-item text-danger">Error loading services</div>';
+            }
+        }
 
-            const customerName = document.getElementById('modalCustomerName').value;
-            const dogBreed = document.getElementById('modalDogBreed').value;
+        // Apointment submission
+        async function handleAppointmentSubmission(e) {
+            e.preventDefault();
+            
+            const dogId = document.getElementById('dogSelect').value;
             const appointmentDate = document.getElementById('modalAppointmentDate').value;
             const appointmentTime = document.getElementById('modalAppointmentTime').value;
-
+            const notes = document.getElementById('modalNotes').value;
+            
             // Get selected service IDs
-            const selectedServiceIds = Array.from(modalServicesList.querySelectorAll('input[type="checkbox"]:checked'))
-                .map(cb => parseInt(cb.value));
-
+            const selectedServiceIds = Array.from(
+                document.querySelectorAll('#modalServicesList input[type="checkbox"]:checked')
+            ).map(cb => parseInt(cb.value));
+            
+            if (!dogId) {
+                showAlert('Please select a dog', 'warning');
+                return;
+            }
+            
+            if (selectedServiceIds.length === 0) {
+                showAlert('Please select at least one service', 'warning');
+                return;
+            }
+            
             const appointment = {
-                customerName,
-                dogBreed,
+                userId: currentUser.id,
+                dogId: parseInt(dogId),
                 appointmentDate,
                 appointmentTime,
-                serviceIds: selectedServiceIds
+                notes,
+                serviceIds: selectedServiceIds,
+                status: "SCHEDULED"
             };
-
+            
             try {
-                // POST request new appointment into 'appointments' table
-                const response = await fetch('http://localhost:8080/appointments', {
+                // Create appointment
+                const response = await fetch('/api/appointments', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(appointment)
                 });
+                
                 if (response.ok) {
-                    responseP.textContent = "Appointment booked successfully!";
+                    // Hide modal
+                    document.getElementById('appointmentModal').style.display = 'none';
+                    
+                    // Show success message
+                    showAlert('Appointment booked successfully!', 'success');
+                    
+                    // Reset form
+                    document.getElementById('appointmentForm').reset();
                 } else {
-                    responseP.textContent = "Failed to book appointment.";
+                    const errorData = await response.json();
+                    showAlert(errorData.error || 'Failed to book appointment', 'danger');
                 }
-                appointmentModal.style.display = 'none';
             } catch (error) {
-                responseP.textContent = "Error booking appointment.";
                 console.error('Error:', error);
-            }
-        });
-
-        // Get request to 'services' table, appending each service to HTML
-        async function loadServices() {
-            const serviceList = document.getElementById('serviceList');
-            try {
-                const response = await fetch('http://localhost:8080/services');
-                const services = await response.json();
-                serviceList.innerHTML = ''; // Ensure empty list before appending anything
-                // Append each service
-                services.forEach(service => {
-                    const li = document.createElement('li');
-                    li.textContent = `${service.name} ($${service.price})`;
-                    serviceList.appendChild(li);
-                });
-            } catch (error) {
-                serviceList.innerHTML = '<li>Error loading services</li>';
+                showAlert('Error booking appointment', 'danger');
             }
         }
 
-        // Initial load
-        loadServices();
+        // Load services
+        async function loadServices() {
+            const serviceList = document.getElementById('serviceList');
+            
+            try {
+                const response = await fetch('/api/services');
+                if (response.ok) {
+                    const services = await response.json();
+                    serviceList.innerHTML = ''; // Clear before setting
+                    
+                    if (services.length === 0) {
+                        serviceList.innerHTML = '<div class="col-12 text-center"><p>No services available at the moment.</p></div>';
+                        return;
+                    }
+                    
+                    // Create service cards
+                    services.forEach(service => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-4 mb-4';
+                        
+                        col.innerHTML = `
+                            <div class="card service-card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">${service.name}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">$${service.price}</h6>
+                                    <p class="card-text">${service.description || 'No description available'}</p>
+                                </div>
+                                <div class="card-footer bg-transparent text-center">
+                                    <button class="btn btn-sm btn-outline-primary book-service-btn" 
+                                            data-service-id="${service.id}">
+                                        Select This Service
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        serviceList.appendChild(col);
+                    });
+                    
+                    // Add event listeners to service booking buttons
+                    document.querySelectorAll('.book-service-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            if (!currentUser) {
+                                showAlert('Please login to book an appointment', 'warning');
+                                setTimeout(() => {
+                                    window.location.href = '/login.html';
+                                }, 1500);
+                                return;
+                            }
+                            
+                            const serviceId = this.getAttribute('data-service-id');
+                            
+                            document.getElementById('showAppointmentModalBtn').click();
+                            
+                            // Pre-select service
+                            setTimeout(() => {
+                                const checkbox = document.getElementById(`service_${serviceId}`);
+                                if (checkbox) checkbox.checked = true;
+                            }, 100);
+                        });
+                    });
+                } else {
+                    serviceList.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Failed to load services</p></div>';
+                }
+            } catch (error) {
+                console.error('Error loading services:', error);
+                serviceList.innerHTML = '<div class="col-12 text-center"><p class="text-danger">Error loading services</p></div>';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertPlaceholder = document.getElementById('alertPlaceholder');
+            const wrapper = document.createElement('div');
+            
+            wrapper.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            alertPlaceholder.innerHTML = '';
+            alertPlaceholder.appendChild(wrapper);
+            
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getOrCreateInstance(wrapper.querySelector('.alert'));
+                alert.close();
+            }, 5000); // Timeout after 5s
+        }
+
+        // Load user's appointments
+        async function loadUserAppointments() {
+            if (!currentUser || !currentUser.id) return;
+            
+            const appointmentsContainer = document.getElementById('myAppointments');
+            
+            try {
+                const response = await fetch(`/api/appointments/user/${currentUser.id}`);
+                if (response.ok) {
+                    const appointments = await response.json();
+                    
+                    if (appointments.length === 0) {
+                        appointmentsContainer.innerHTML = 
+                            '<div class="alert alert-info">You don\'t have any appointments yet.</div>';
+                        return;
+                    }
+                    
+                    // Sort appointments by date (newest first)
+                    appointments.sort((a, b) => {
+                        const dateA = new Date(a.appointmentDate + 'T' + a.appointmentTime);
+                        const dateB = new Date(b.appointmentDate + 'T' + b.appointmentTime);
+                        return dateA - dateB;
+                    });
+                    
+                    // Create a row for the appointments
+                    const row = document.createElement('div');
+                    row.className = 'row justify-content-center';
+                    
+                    // Display appointments
+                    appointments.forEach(appointment => {
+                        // Format date
+                        const appointmentDate = new Date(appointment.appointmentDate + 'T' + appointment.appointmentTime);
+                        const formattedDate = appointmentDate.toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        
+                        const formattedTime = appointment.appointmentTime;
+                        
+                        // Get dog name
+                        const dogName = appointment.dog ? appointment.dog.name : 'Unknown Dog';
+                        const dogBreed = appointment.dog && appointment.dog.breed ? appointment.dog.breed : 'Unknown Breed';
+                        
+                        // Get services
+                        const serviceNames = appointment.services 
+                            ? appointment.services.map(service => service.name).join(', ') 
+                            : 'No services';
+                        
+                        // Get status
+                        let statusClass = 'status-scheduled';
+                        if (appointment.status === 'COMPLETED') {
+                            statusClass = 'status-completed';
+                        } else if (appointment.status === 'CANCELLED') {
+                            statusClass = 'status-cancelled';
+                        }
+                        
+                        // Create appointment card
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6 col-lg-4 mb-4';
+                        col.innerHTML = `
+                            <div class="card appointment-card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span>${dogName}</span>
+                                    <span class="appointment-status ${statusClass}">${appointment.status}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">${formattedDate}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">at ${formattedTime}</h6>
+                                    <p class="card-text">
+                                        <strong>Dog:</strong> ${dogName} (${dogBreed})<br>
+                                        <strong>Services:</strong> ${serviceNames}<br>
+                                        <strong>Notes:</strong> ${appointment.notes || 'No special instructions'}
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-outline-primary edit-appointment-btn" 
+                                                data-appointment-id="${appointment.id}">
+                                            Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger cancel-appointment-btn" 
+                                                data-appointment-id="${appointment.id}">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        row.appendChild(col);
+                    });
+                    
+                    appointmentsContainer.innerHTML = '';
+                    appointmentsContainer.appendChild(row);
+                    
+                    document.querySelectorAll('.cancel-appointment-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const appointmentId = this.getAttribute('data-appointment-id');
+                            if (confirm('Are you sure you want to cancel this appointment?')) {
+                                cancelAppointment(appointmentId);
+                            }
+                        });
+                    });
+                } else {
+                    appointmentsContainer.innerHTML = 
+                        '<div class="alert alert-danger">Failed to load your appointments</div>';
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                appointmentsContainer.innerHTML = 
+                    '<div class="alert alert-danger">Error loading your appointments</div>';
+            }
+        }
+
+        // Cancel an appointment
+        async function cancelAppointment(appointmentId) {
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'CANCELLED' })
+                });
+                
+                if (response.ok) {
+                    showAlert('Appointment cancelled successfully', 'success');
+                    loadUserAppointments();
+                } else {
+                    const errorData = await response.json();
+                    showAlert(errorData.error || 'Failed to cancel appointment', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error cancelling appointment', 'danger');
+            }
+        }
     </script>
 </body>
 </html>

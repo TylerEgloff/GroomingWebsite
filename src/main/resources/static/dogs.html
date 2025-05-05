@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barky Barbers - My Dogs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .dog-card {
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .dog-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .add-dog-btn {
+            margin-bottom: 30px;
+        }
+
+        #alertPlaceholder {
+            margin-bottom: 20px;
+        }
+
+        .container {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .card-footer {
+            padding: 15px;
+        }
+
+        @media (max-width: 767px) {
+            .card-footer .d-flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .card-footer button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Barky Barbers</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/appointment.html">My Appointments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dogs.html">My Dogs</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item" id="loginNav">
+                        <a class="nav-link" href="/login.html">Login/Register</a>
+                    </li>
+                    <li class="nav-item" id="logoutNav" style="display: none;">
+                        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin.html">*Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>My Dogs</h1>
+                <p>Manage your pet's information here.</p>
+                <div id="alertPlaceholder" class="mb-3"></div>
+                <button class="btn btn-primary add-dog-btn" data-bs-toggle="modal" data-bs-target="#addDogModal">
+                    <i class="bi bi-plus-circle"></i> Add New Dog
+                </button>
+            </div>
+        </div>
+
+        <div class="row" id="dogsList">
+            <!-- Dog cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Add Dog Modal -->
+    <div class="modal fade" id="addDogModal" tabindex="-1" aria-labelledby="addDogModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDogModalLabel">Add New Dog</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDogForm">
+                        <div class="mb-3">
+                            <label for="dogName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="dogName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="dogBreed" class="form-label">Breed</label>
+                            <input type="text" class="form-control" id="dogBreed">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dogAge" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="dogAge" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dogNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="dogNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveDogBtn">Save Dog</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Dog Modal -->
+    <div class="modal fade" id="editDogModal" tabindex="-1" aria-labelledby="editDogModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editDogModalLabel">Edit Dog</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDogForm">
+                        <input type="hidden" id="editDogId">
+                        <div class="mb-3">
+                            <label for="editDogName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="editDogName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDogBreed" class="form-label">Breed</label>
+                            <input type="text" class="form-control" id="editDogBreed">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDogAge" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="editDogAge" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDogNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="editDogNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateDogBtn">Update Dog</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if user is logged in
+        let currentUser;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                showAlert('Please login to view your dogs', 'warning');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
+                return;
+            }
+
+            document.getElementById('loginNav').style.display = 'none';
+            document.getElementById('logoutNav').style.display = 'block';
+
+            // Initialize (load dogs)
+            loadDogs();
+
+            // Check if we are coming from add new dog link (appointment form)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openAddDogModal') === 'true') {
+                const addDogModal = new bootstrap.Modal(document.getElementById('addDogModal'));
+                addDogModal.show();
+            }
+        });
+
+        function showAlert(message, type) {
+            const alertPlaceholder = document.getElementById('alertPlaceholder');
+            const wrapper = document.createElement('div');
+
+            wrapper.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            alertPlaceholder.innerHTML = '';
+            alertPlaceholder.appendChild(wrapper);
+
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getOrCreateInstance(wrapper.querySelector('.alert'));
+                alert.close();
+            }, 5000); // Timeout after 5s
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('currentUser');
+            showAlert('Logged out successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 1500);
+        });
+
+        // Load dogs for current user
+        async function loadDogs() {
+            if (!currentUser || !currentUser.id) {
+                console.error('No current user found or missing user ID');
+                showAlert('Please log in to view your dogs', 'warning');
+                return;
+            }
+            
+            try {
+                // Add loading indicator
+                const dogsList = document.getElementById('dogsList');
+                dogsList.innerHTML = '<div class="col-12 text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+                
+                const response = await fetch(`/api/dogs/user/${currentUser.id}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Failed to fetch dogs:', response.status, errorText);
+                    showAlert(`Failed to load your dogs (${response.status})`, 'danger');
+                    return;
+                }
+                
+                const dogs = await response.json();
+                displayDogs(dogs);
+            } catch (error) {
+                console.error('Error loading dogs:', error);
+                showAlert('Error loading your dogs: ' + error.message, 'danger');
+            }
+        }
+
+        // Display dogs
+        function displayDogs(dogs) {
+            const dogsList = document.getElementById('dogsList');
+            
+            // Clear previous content
+            dogsList.innerHTML = '';
+            
+            // If no dogs, show a simple message
+            if (dogs.length === 0) {
+                dogsList.innerHTML = '<div class="col-12 text-center"><p class="lead">You don\'t have any dogs added yet.</p></div>';
+                return;
+            }
+
+            // Create a card for each dog
+            dogs.forEach(dog => {
+                const dogCard = document.createElement('div');
+                dogCard.className = 'col-md-4 mb-4';
+                dogCard.innerHTML = `
+                    <div class="card dog-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">${dog.name}</h5>
+                            <p class="card-text"><strong>Breed:</strong> ${dog.breed || 'Not specified'}</p>
+                            <p class="card-text"><strong>Age:</strong> ${dog.age || 'Not specified'}</p>
+                            <p class="card-text"><strong>Notes:</strong> ${dog.notes || 'No notes'}</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <button class="btn btn-sm btn-primary edit-dog-btn" data-dog-id="${dog.id}">Edit</button>
+                                    <button class="btn btn-sm btn-danger delete-dog-btn" data-dog-id="${dog.id}">Delete</button>
+                                </div>
+                                <button class="btn btn-sm btn-success book-appointment-btn" data-dog-id="${dog.id}" data-dog-name="${dog.name}">
+                                    Book Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                dogsList.appendChild(dogCard);
+            });
+
+            // Add event listeners to buttons
+            addButtonEventListeners();
+        }
+
+        // Add event listeners to dog card buttons
+        function addButtonEventListeners() {
+            document.querySelectorAll('.edit-dog-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const dogId = this.getAttribute('data-dog-id');
+                    openEditDogModal(dogId);
+                });
+            });
+
+            document.querySelectorAll('.delete-dog-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const dogId = this.getAttribute('data-dog-id');
+                    deleteDog(dogId);
+                });
+            });
+
+            document.querySelectorAll('.book-appointment-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const dogId = this.getAttribute('data-dog-id');
+                    const dogName = this.getAttribute('data-dog-name');
+
+                    // Store the dog ID in localStorage for use in the appointment page
+                    localStorage.setItem('selectedDogId', dogId);
+                    localStorage.setItem('selectedDogName', dogName);
+
+                    // Redirect to appointment page
+                    window.location.href = '/appointment.html?dogId=' + dogId;
+                });
+            });
+        }
+
+        // Save new dog
+        document.getElementById('saveDogBtn').addEventListener('click', async function() {
+            const name = document.getElementById('dogName').value.trim();
+            const breed = document.getElementById('dogBreed').value.trim();
+            const age = document.getElementById('dogAge').value.trim();
+            const notes = document.getElementById('dogNotes').value.trim();
+            
+            if (!name) {
+                showAlert('Please enter a name for your dog', 'warning');
+                return;
+            }
+            
+            // Disable button to prevent multiple submissions
+            const saveBtn = document.getElementById('saveDogBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+            
+            const dogData = {
+                name: name,
+                breed: breed || null,
+                age: age ? parseInt(age) : null,
+                notes: notes || null,
+                user: {
+                    id: currentUser.id
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/dogs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dogData)
+                });
+                
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+                
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addDogModal'));
+                    modal.hide();
+                    document.getElementById('addDogForm').reset();
+                    
+                    showAlert('Dog added successfully!', 'success');
+                    
+                    // Wait a moment before reloading dogs to ensure server has processed
+                    setTimeout(() => {
+                        loadDogs();
+                    }, 500);
+                } else {
+                    let errorMessage = 'Failed to add dog';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                    }
+                    showAlert(errorMessage, 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred while adding the dog: ' + error.message, 'danger');
+                
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+            }
+        });
+
+        // Open edit modal
+        async function openEditDogModal(dogId) {
+            try {
+                const response = await fetch(`/api/dogs/${dogId}`);
+                if (response.ok) {
+                    const dog = await response.json();
+
+                    // Fill form with data
+                    document.getElementById('editDogId').value = dog.id;
+                    document.getElementById('editDogName').value = dog.name;
+                    document.getElementById('editDogBreed').value = dog.breed || '';
+                    document.getElementById('editDogAge').value = dog.age || '';
+                    document.getElementById('editDogNotes').value = dog.notes || '';
+
+                    const modal = new bootstrap.Modal(document.getElementById('editDogModal'));
+                    modal.show();
+                } else {
+                    showAlert('Failed to fetch dog details', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred while fetching dog details', 'danger');
+            }
+        }
+
+        // Update dog
+        document.getElementById('updateDogBtn').addEventListener('click', async function () {
+            const dogId = document.getElementById('editDogId').value;
+            const name = document.getElementById('editDogName').value;
+            const breed = document.getElementById('editDogBreed').value;
+            const age = document.getElementById('editDogAge').value;
+            const notes = document.getElementById('editDogNotes').value;
+
+            if (!name) {
+                showAlert('Please enter a name for your dog', 'warning');
+                return;
+            }
+
+            const dogData = {
+                name: name,
+                breed: breed,
+                age: age ? parseInt(age) : null,
+                notes: notes
+            };
+
+            try {
+                const response = await fetch(`/api/dogs/${dogId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dogData)
+                });
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editDogModal'));
+                    modal.hide();
+
+                    showAlert('Dog updated successfully!', 'success');
+
+                    setTimeout(() => {
+                        loadDogs();
+                    }, 500);
+                } else {
+                    const errorData = await response.json();
+                    showAlert(errorData.error || 'Failed to update dog', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred while updating the dog', 'danger');
+            }
+        });
+
+        // Delete dog
+        async function deleteDog(dogId) {
+            if (!confirm('Are you sure you want to delete this dog?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/dogs/${dogId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('Dog deleted successfully!', 'success');
+
+                    loadDogs();
+                } else {
+                    const errorData = await response.json();
+                    showAlert(errorData.error || 'Failed to delete dog', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred while deleting the dog', 'danger');
+            }
+        }
+    </script>
+</body>
+
+</html>
+
+
+
+
+
